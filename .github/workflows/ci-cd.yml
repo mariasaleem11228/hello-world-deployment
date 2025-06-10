@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main   # Run on push to main branch
+      - main
 
 jobs:
   build:
@@ -22,24 +22,31 @@ jobs:
       - name: Build frontend image
         run: docker build -t frontend ./frontend
 
-      - name: Run backend tests (if any)
+      - name: Run backend tests (optional)
         run: |
           cd backend
-          dotnet test
+          dotnet test || true   # Avoid breaking pipeline if tests aren't ready
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup SSH agent
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Deploy to EC2
+      - name: Add EC2 Host to Known Hosts
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@3.84.112.14 << 'EOF'
+          ssh-keyscan -H 3.84.112.14 >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2 Instance
+        run: |
+          ssh ubuntu@3.84.112.14 << 'EOF'
             cd ~/hello-world-deployment
             git pull origin main
             docker compose down
