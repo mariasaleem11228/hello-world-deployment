@@ -1,8 +1,8 @@
 FROM nginx:alpine
 
-COPY index.html /usr/share/nginx/html/index.html
-
 ARG CACHE_BUST=1
+
+COPY index.html /usr/share/nginx/html/index.html
 
 EXPOSE 80
 
