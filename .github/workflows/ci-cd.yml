@@ -25,7 +25,7 @@ jobs:
       - name: Run backend tests (optional)
         run: |
           cd backend
-          dotnet test || true   # Avoid breaking pipeline if tests aren't ready
+          dotnet test || true   # Don't fail if no tests yet
 
   deploy:
     needs: build
@@ -48,7 +48,18 @@ jobs:
         run: |
           ssh ubuntu@3.84.112.14 << 'EOF'
             cd ~/hello-world-deployment
+            echo "Pulling latest code from main branch..."
             git pull origin main
+
+            echo "Stopping existing containers..."
             docker compose down
-            docker compose up -d --build
+
+            echo "Forcing rebuild of images without cache..."
+            docker compose build --no-cache
+
+            echo "Starting containers with new images..."
+            docker compose up -d
+
+            echo "Deployment complete. Current containers:"
+            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.RunningFor}}"
           EOF
