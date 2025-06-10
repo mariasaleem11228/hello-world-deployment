@@ -56,7 +56,7 @@ jobs:
 
             echo "Forcing rebuild of images without cache..."
             export CACHE_BUST=$(date +%s)
-            docker compose build --no-cache --build-arg CACHE_BUST=$CACHE_BUST
+            docker compose build --no-cache --pull --build-arg CACHE_BUST=$CACHE_BUST
 
             echo "Starting containers with new images..."
             docker compose up -d
