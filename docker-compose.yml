@@ -9,5 +9,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - CACHE_BUST=${CACHE_BUST}
     ports:
       - "80:80"
