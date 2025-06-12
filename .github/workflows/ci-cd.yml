@@ -48,11 +48,11 @@ jobs:
 
       - name: Add EC2 Host to Known Hosts
         run: |
-          ssh-keyscan -H 3.84.112.14 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 18.204.197.22 >> ~/.ssh/known_hosts
 
       - name: Deploy to EC2 Instance
         run: |
-          ssh ubuntu@3.84.112.14 << 'EOF'
+          ssh ubuntu@18.204.197.22 << 'EOF'
             cd ~/hello-world-deployment
             echo "Resetting repo to clean state..."
             git reset --hard HEAD
