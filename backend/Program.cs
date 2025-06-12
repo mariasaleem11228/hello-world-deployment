@@ -38,7 +38,7 @@ app.MapGet("/weatherforecast", () =>
 
 app.MapGet("/helloworld", () =>
 {
-     return "ab to aja .NET!!";
+     return "Hi .NET!!";
 })
 .WithName("GetHelloWorld")
 .WithOpenApi();
