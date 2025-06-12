@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
 
 jobs:
   build:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +33,7 @@ jobs:
           dotnet test || true   # Don't fail if no tests yet
 
   deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     needs: build
     runs-on: ubuntu-latest
 
@@ -52,7 +58,7 @@ jobs:
             git reset --hard HEAD
             git clean -fd
             git pull origin main
-            
+
             echo "Stopping existing containers..."
             docker compose down
 
