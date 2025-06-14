@@ -1,12 +1,10 @@
-version: '3'
-
 services:
   backend:
-    image: mariasaleem11228/backend:${VERSION}
+    image: mariasaleem11228/backend:v1.0.0
     ports:
       - "5000:8080"
 
   frontend:
-    image: mariasaleem11228/frontend:${VERSION}
+    image: mariasaleem11228/frontend:v1.0.0
     ports:
       - "80:80"
