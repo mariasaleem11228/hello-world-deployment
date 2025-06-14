@@ -64,7 +64,8 @@ jobs:
         run: |
           ssh ubuntu@18.204.197.22 << 'EOF'
             cd ~/hello-world-deployment
-            git reset --hard HEAD
+            git fetch origin
+            git reset --hard origin/Bug_TK012
             git clean -fd
             git pull origin Bug_TK012
 
