@@ -52,8 +52,8 @@ jobs:
             git clean -fd
             git pull origin main
 
-            sed -i 's/backend:.*/backend:${{ env.VERSION }}/' docker-compose.yml
-            sed -i 's/frontend:.*/frontend:${{ env.VERSION }}/' docker-compose.yml
+            sed -i 's|image:.*backend.*|image: mariasaleem11228/backend:v1.0.0|' docker-compose.yml
+            sed -i 's|image:.*frontend.*|image: mariasaleem11228/frontend:v1.0.0|' docker-compose.yml
 
             docker compose down
             docker compose pull
