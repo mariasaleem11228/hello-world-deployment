@@ -49,6 +49,8 @@ jobs:
             cd ~/hello-world-deployment
             git fetch origin
             git reset --hard origin/main
+            git clean -fd
+            git pull origin main
 
             sed -i 's/backend:.*/backend:${{ env.VERSION }}/' docker-compose.yml
             sed -i 's/frontend:.*/frontend:${{ env.VERSION }}/' docker-compose.yml
