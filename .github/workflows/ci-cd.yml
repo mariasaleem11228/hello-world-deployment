@@ -3,16 +3,13 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main 
-  pull_request:
-    types: [closed]
-    branches:
       - main
 
 jobs:
-  build:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+  build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      VERSION: v1.0.0  # <-- Change this version tag per release
 
     steps:
       - name: Checkout code
@@ -29,27 +26,13 @@ jobs:
 
       - name: Build and push backend image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest ./backend
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }} ./backend
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }}
 
       - name: Build and push frontend image
         run: |
-          docker build --build-arg CACHE_BUST=$(date +%s) -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest ./frontend
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
-
-      - name: Run backend tests (optional)
-        run: |
-          cd backend
-          dotnet test || true
-
-  deploy:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }} ./frontend
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }}
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -58,20 +41,18 @@ jobs:
 
       - name: Add EC2 Host to Known Hosts
         run: |
-          ssh-keyscan -H 18.204.197.22 >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to EC2 Instance
+      - name: Deploy to EC2
         run: |
-          ssh ubuntu@18.204.197.22 << 'EOF'
+          ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             cd ~/hello-world-deployment
-            git fetch origin
-            git reset --hard origin/main
-            git clean -fd
             git pull origin main
+
+            sed -i 's/backend:.*/backend:${{ env.VERSION }}/' docker-compose.yml
+            sed -i 's/frontend:.*/frontend:${{ env.VERSION }}/' docker-compose.yml
 
             docker compose down
             docker compose pull
             docker compose up -d
-
-            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.RunningFor}}"
           EOF
