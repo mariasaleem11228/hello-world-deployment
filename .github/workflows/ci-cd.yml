@@ -45,7 +45,7 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh ubuntu@34.227.149.44 << 'EOF'
+          ssh -t ubuntu@34.227.149.44 << 'EOF'
             cd ~/hello-world-deployment
             git pull origin main
 
