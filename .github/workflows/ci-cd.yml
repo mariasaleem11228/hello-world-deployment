@@ -3,11 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - Bug_TK012  # testing on Bug_TK012
+      - main 
   pull_request:
     types: [closed]
     branches:
-      - Bug_TK012
+      - main
 
 jobs:
   build:
@@ -65,9 +65,9 @@ jobs:
           ssh ubuntu@18.204.197.22 << 'EOF'
             cd ~/hello-world-deployment
             git fetch origin
-            git reset --hard origin/Bug_TK012
+            git reset --hard origin/main
             git clean -fd
-            git pull origin Bug_TK012
+            git pull origin main
 
             docker compose down
             docker compose pull
