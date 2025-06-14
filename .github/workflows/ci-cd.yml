@@ -45,9 +45,10 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -t ubuntu@34.227.149.44 << 'EOF'
+          ssh ubuntu@34.227.149.44 << "EOF"
             cd ~/hello-world-deployment
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
 
             sed -i 's/backend:.*/backend:${{ env.VERSION }}/' docker-compose.yml
             sed -i 's/frontend:.*/frontend:${{ env.VERSION }}/' docker-compose.yml
