@@ -1,0 +1,4 @@
+**/bin/
+**/obj/
+
+#This avoids including compiled junk that can break builds.
