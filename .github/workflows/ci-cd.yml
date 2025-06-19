@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
@@ -60,9 +63,6 @@ jobs:
             # Update image tags in docker-compose.yml
             sed -i "s|image: ${USERNAME}/backend:.*|image: ${USERNAME}/backend:${VERSION}|" docker-compose.yml
             sed -i "s|image: ${USERNAME}/frontend:.*|image: ${USERNAME}/frontend:${VERSION}|" docker-compose.yml
-
-            echo "--- docker-compose.yml ---"
-            cat docker-compose.yml
 
             # Clean up old images to force fresh pull
             docker compose down
