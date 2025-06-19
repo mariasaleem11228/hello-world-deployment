@@ -50,10 +50,10 @@ jobs:
         run: |
           ssh ubuntu@3.84.234.72 << "EOF"
             cd ~/hello-world-deployment
-            git fetch origin
+            git fetch origin main
+            git checkout main
             git reset --hard origin/main
             git clean -fd
-            git pull origin main
 
             # Update docker-compose image tags
             sed -i "s|image:.*backend.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }}|" docker-compose.yml
