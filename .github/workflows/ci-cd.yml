@@ -53,6 +53,7 @@ jobs:
             git fetch origin
             git reset --hard origin/main
             git clean -fd
+            git pull origin main
 
             # Update docker-compose image tags
             sed -i "s|image:.*backend.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }}|" docker-compose.yml
