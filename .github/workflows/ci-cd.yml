@@ -18,7 +18,12 @@ jobs:
       - name: Run backend unit tests in Docker
         run: |
           echo "Running unit tests in Docker..."
-          docker build --target test -t backend-test -f ./backend/Dockerfile .
+          if ! docker build --target test -t backend-test -f ./backend/Dockerfile .; then
+            echo "❌ Unit tests failed! Stopping deployment."
+            exit 1
+          else
+            echo "✅ Unit tests passed."
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
