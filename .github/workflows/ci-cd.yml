@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-and-deploy:
@@ -26,12 +29,12 @@ jobs:
 
       - name: Build and push backend image
         run: |
-          docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }} ./backend
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }} ./backend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }}
 
       - name: Build and push frontend image
         run: |
-          docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }} ./frontend
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }} ./frontend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }}
 
       - name: Setup SSH Agent
@@ -45,42 +48,36 @@ jobs:
 
       - name: Deploy and Verify
         run: |
-          VERSION=${{ env.VERSION }}
-          USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-
-          ssh ubuntu@3.84.234.72 << EOF
-            set -e
+          ssh ubuntu@3.84.234.72 << "EOF"
             cd ~/hello-world-deployment
-
-            git fetch origin main
-            git checkout main
+            git fetch origin
             git reset --hard origin/main
             git clean -fd
 
             # Update docker-compose image tags
-            sed -i "s|image:.*backend.*|image: ${USERNAME}/backend:${VERSION}|" docker-compose.yml
-            sed -i "s|image:.*frontend.*|image: ${USERNAME}/frontend:${VERSION}|" docker-compose.yml
-
+            sed -i "s|image:.*backend.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }}|" docker-compose.yml
+            sed -i "s|image:.*frontend.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }}|" docker-compose.yml
+            cat docker-compose.yml
             docker compose down
-            docker compose pull --ignore-pull-failures
+            docker compose pull
             docker compose up -d
 
             echo "Waiting 20s for containers to stabilize..."
             sleep 20
 
-            BACKEND_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/helloworld || echo 000)
-            FRONTEND_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" http://localhost || echo 000)
+            BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/helloworld || echo 000)
+            FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost || echo 000)
 
-            if [ "\$BACKEND_STATUS" != "200" ] || [ "\$FRONTEND_STATUS" != "200" ]; then
+            if [ "$BACKEND_STATUS" != "200" ] || [ "$FRONTEND_STATUS" != "200" ]; then
               echo "Health check failed. Rolling back to previous version..."
-              PREV_VERSION=\$(docker images | grep backend | awk 'NR==2{print \$2}')
-              sed -i "s|${VERSION}|\$PREV_VERSION|g" docker-compose.yml
+              PREV_VERSION=$(docker images | grep backend | awk 'NR==2{print $2}')
+              sed -i "s|${{ env.VERSION }}|$PREV_VERSION|g" docker-compose.yml
 
               docker compose down
               docker compose pull
               docker compose up -d
-        
-              echo "Rolled back to \$PREV_VERSION"
+              
+              echo "Rolled back to $PREV_VERSION"
             else
               echo "Deployment succeeded"
             fi
