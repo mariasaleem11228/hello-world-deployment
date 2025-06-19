@@ -1,3 +1,10 @@
+# Test stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS test
+WORKDIR /src
+COPY . .
+RUN dotnet restore
+RUN dotnet test --no-restore --verbosity normal
+
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
