@@ -2,13 +2,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS test
 WORKDIR /src
 
-COPY backend/backend.csproj ./backend/
-COPY Backend.Test/Backend.Test.csproj ./Backend.Test/
+# Copy project files first
+COPY ../backend/backend.csproj ./backend/
+COPY ../Backend.Test/Backend.Test.csproj ./Backend.Test/
+
+# Restore dependencies
 RUN dotnet restore ./Backend.Test/Backend.Test.csproj
 
-COPY backend ./backend/
-COPY Backend.Test ./Backend.Test/
-RUN dotnet test ./Backend.Test/Backend.Test.csproj --no-restore --verbosity normal
+# Copy full source
+COPY ../backend ./backend/
+COPY ../Backend.Test ./Backend.Test/
+
+# Run tests
+RUN dotnet test ./Backend.Test/Backend.Test.csproj --no-restore --logger:"console;verbosity=detailed"
 
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
