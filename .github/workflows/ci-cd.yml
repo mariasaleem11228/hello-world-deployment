@@ -29,12 +29,12 @@ jobs:
 
       - name: Build and push backend image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }} ./backend
+          docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }} ./backend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ env.VERSION }}
 
       - name: Build and push frontend image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }} ./frontend
+          docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }} ./frontend
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:${{ env.VERSION }}
 
       - name: Setup SSH Agent
