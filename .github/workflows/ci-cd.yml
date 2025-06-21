@@ -61,14 +61,14 @@ jobs:
 
       - name: Add EC2 Host to Known Hosts
         run: |
-          ssh-keyscan -H 34.238.122.139 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 344.211.140.225 >> ~/.ssh/known_hosts
 
       - name: Deploy and Verify
         run: |
           VERSION=${{ env.VERSION }}
           USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
 
-          ssh ubuntu@34.238.122.139 << EOF
+          ssh ubuntu@44.211.140.225 << EOF
             set -e
             cd ~/hello-world-deployment
 
