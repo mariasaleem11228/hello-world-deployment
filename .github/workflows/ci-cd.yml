@@ -61,7 +61,7 @@ jobs:
 
       - name: Add EC2 Host to Known Hosts
         run: |
-          ssh-keyscan -H 344.211.140.225 >> ~/.ssh/known_hosts
+          ssh-keyscan -H 44.211.140.225 >> ~/.ssh/known_hosts
 
       - name: Deploy and Verify
         run: |
